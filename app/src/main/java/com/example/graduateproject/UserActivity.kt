@@ -23,5 +23,25 @@ class UserActivity : AppCompatActivity() {
 
         val imageView = actionBar?.customView?.findViewById<ImageView>(R.id.customImageView)
         imageView?.setImageResource(R.drawable.logo)
+
+        val btnlogout = findViewById<Button>(R.id.btnlogout)
+
+        btnlogout.setOnClickListener {
+            logOut()
+        }
+    }
+    //保存登入狀態
+    private fun setLoggedInStatus(isLoggedIn: Boolean) {
+        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("is_logged_in", isLoggedIn)
+        editor.apply()
+    }
+    private fun logOut() {
+        setLoggedInStatus(false)
+        // 這裡也可以加入其他登出的相關操作，例如清除資料等
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

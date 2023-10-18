@@ -150,10 +150,36 @@
         android:id="@+id/btnlogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="136dp"
+        android:layout_marginStart="150dp"
+        android:layout_marginEnd="150dp"
         android:layout_marginBottom="16dp"
         android:text="登出"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="150dp"
+        android:layout_marginEnd="150dp"
+        android:layout_marginBottom="10dp"
+        android:text="儲存修改"
+        app:layout_constraintBottom_toTopOf="@+id/btnlogout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/img_camera"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="96dp"
+        android:layout_marginBottom="496dp"
+        android:contentDescription="photo"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/camera" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

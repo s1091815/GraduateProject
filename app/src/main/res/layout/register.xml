@@ -14,32 +14,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo" />
 
-    <EditText
-        android:id="@+id/edit_Phone"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="108dp"
-        android:layout_marginTop="400dp"
-        android:ems="10"
-        android:hint="請輸入手機號碼"
-        android:inputType="phone"
-        android:textAlignment="inherit"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/img_logo"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/icon_phone"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="inherit"
-        app:layout_constraintEnd_toStartOf="@+id/edit_Phone"
-        app:layout_constraintTop_toBottomOf="@+id/img_logo"
-        app:srcCompat="@drawable/phone" />
-
     <TextView
         android:id="@+id/txv_register"
         android:layout_width="wrap_content"
@@ -60,22 +34,63 @@
         android:id="@+id/btn_register"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:layout_marginStart="180dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginBottom="40dp"
         android:text="註冊"
         android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/check_permission" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <CheckBox
-        android:id="@+id/check_permission"
+    <EditText
+        android:id="@+id/edit_verificationCode"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="112dp"
-        android:layout_marginTop="24dp"
-        android:text="我同意資料授權予以使用"
-        android:textSize="18sp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="68dp"
+        android:ems="10"
+        android:hint="請輸入驗證碼"
+        android:inputType="number"
+        android:textAlignment="inherit"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_Phone" />
+
+    <EditText
+        android:id="@+id/edit_Phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="400dp"
+        android:ems="10"
+        android:hint="請輸入手機號碼"
+        android:inputType="phone"
+        android:textAlignment="inherit"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_logo"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/icon_phone"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="8dp"
+        android:textAlignment="inherit"
+        app:layout_constraintEnd_toStartOf="@+id/edit_Phone"
+        app:layout_constraintTop_toBottomOf="@+id/img_logo"
+        app:srcCompat="@drawable/phone" />
+
+    <Button
+        android:id="@+id/btn_sendverify"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="28dp"
+        android:text="發送驗證碼"
+        android:textSize="10sp"
+        app:layout_constraintStart_toEndOf="@+id/edit_Phone"
+        app:layout_constraintTop_toBottomOf="@+id/img_logo" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
