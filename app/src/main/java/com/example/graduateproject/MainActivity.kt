@@ -268,8 +268,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 LOCATION_REQUEST_CODE
             )
         }else {
-            getMyCurrentLocation()
+            return
         }
+        getMyCurrentLocation()
         mMap.isMyLocationEnabled = true
         mMap.setOnMarkerClickListener(this)
     }
@@ -309,6 +310,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     override fun onMarkerClick(marker: Marker) = false
 
     override fun onBackPressed() {
+        if (isRecording) {
+            btnEndActivity()
+            return
+        }
+
         val alertDialog = AlertDialog.Builder(this)
             .setTitle("退出APP")
             .setMessage("確定要退出應用程式？")

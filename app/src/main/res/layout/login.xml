@@ -32,6 +32,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/img_logo" />
 
+    <EditText
+        android:id="@+id/edit_verificationCode"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="100dp"
+        android:ems="10"
+        android:hint="請輸入驗證碼"
+        android:inputType="number"
+        android:textAlignment="inherit"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_logo" />
+
     <ImageView
         android:id="@+id/icon_phone"
         android:layout_width="40dp"
@@ -64,7 +78,7 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="160dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="72dp"
         android:text="登入"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -92,4 +106,5 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,7 +17,7 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.TimeUnit
 
-class RegisterActivity: AppCompatActivity() {
+class RegisterActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
@@ -53,7 +53,7 @@ class RegisterActivity: AppCompatActivity() {
                     if (isRegistered) {
                         Toast.makeText(this, "此手機號碼已註冊!", Toast.LENGTH_SHORT).show()
                     } else {
-                        sendVerificationCode(phoneNumber)
+                        sendVerificationCode("+886" + phoneNumber.substring(1))
                     }
                 }
             } else {
@@ -70,7 +70,6 @@ class RegisterActivity: AppCompatActivity() {
             }
 
             verifyVerificationCode(code)
-
         }
     }
 
@@ -79,17 +78,18 @@ class RegisterActivity: AppCompatActivity() {
     }
 
     private fun checkIfPhoneIsRegistered(phoneNumber: String, callback: (Boolean) -> Unit) {
-        val phoneDoc = firestore.collection("users").document(phoneNumber)
-        phoneDoc.get().addOnSuccessListener { documentSnapshot ->
-            callback(documentSnapshot.exists())
-        }.addOnFailureListener { e ->
-            Toast.makeText(this@RegisterActivity, "資料庫錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+        firestore.collection("users").document(phoneNumber)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                callback(documentSnapshot.exists())
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this@RegisterActivity, "資料庫錯誤: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
+            }
     }
 
-    private fun sendVerificationCode(phoneNumber: String) {
-        val e164PhoneNumber = "+886" + phoneNumber.substring(1)
-
+    private fun sendVerificationCode(e164PhoneNumber: String) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
             e164PhoneNumber,
             60,
@@ -101,7 +101,11 @@ class RegisterActivity: AppCompatActivity() {
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    Toast.makeText(this@RegisterActivity, "驗證碼發送失敗: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "驗證碼發送失敗: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 override fun onCodeSent(
@@ -122,7 +126,6 @@ class RegisterActivity: AppCompatActivity() {
     }
 
     private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
-
         val edit_Phone = findViewById<EditText>(R.id.edit_Phone)
 
         auth.signInWithCredential(credential)
@@ -141,15 +144,10 @@ class RegisterActivity: AppCompatActivity() {
     }
 
     private fun savePhoneNumberToDatabase(phoneNumber: String) {
-        val phoneDoc = firestore.collection("users").document(phoneNumber)
-
-        // 初始化使用者資料 (您可以根據需要加入更多初始資料)
-        val userData = HashMap<String, Any>()
-
-        // 將使用者資料存入 Firestore 的 "users" 集合
-        phoneDoc.set(userData)
+        val emptyMap = HashMap<String, Any>()
+        firestore.collection("users").document(phoneNumber)
+            .set(emptyMap)
             .addOnSuccessListener {
-                // 當使用者資料儲存成功後，新增預設地點和排行榜資料
                 addDefaultLocationsForUser(phoneNumber)
                 addToLeaderboard(phoneNumber)
             }
@@ -164,12 +162,16 @@ class RegisterActivity: AppCompatActivity() {
             mapOf("名稱" to "清水第二市場", "位置" to hashMapOf("lat" to 24.2680596, "lng" to 120.5607999)),
             mapOf("名稱" to "清水國中", "位置" to hashMapOf("lat" to 24.2679703, "lng" to 120.5630871)),
             mapOf("名稱" to "清水南社社區活動中心", "位置" to hashMapOf("lat" to 24.2648996, "lng" to 120.5639011)),
-            mapOf("名稱" to "清水南社壽德宮", "位置" to hashMapOf("lat" to 24.2658536, "lng" to 120.5633261)),
+            mapOf("名稱" to "清水南社壽德宮", "位置" to hashMapOf("lat" to 24.2658536, "lng" to 120.5633261))
         )
 
         for (location in locations) {
             val name = location["名稱"] as String
-            firestore.collection("users").document(phoneNumber).collection("地點").document(name).set(location)
+            firestore.collection("users").document(phoneNumber).collection("地點").document(name)
+                .set(location)
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "新增地點錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
@@ -181,5 +183,11 @@ class RegisterActivity: AppCompatActivity() {
         )
 
         firestore.collection("排行榜").document(phoneNumber).set(leaderboardData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "已新增到排行榜", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "新增到排行榜錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }
