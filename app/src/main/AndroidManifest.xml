@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -14,6 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GraduateProject"
         tools:targetApi="31">
+        <service android:name=".LocationTrackingService"></service>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -24,44 +27,31 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".LoginActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".RegisterActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".UserActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".RecordActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".ChartActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".TreeActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"></activity>
     </application>
 
 </manifest>

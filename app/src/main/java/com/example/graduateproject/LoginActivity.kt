@@ -6,9 +6,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.graduateproject.RegisterActivity // 替换为正确的包名和类名
-import com.example.graduateproject.R // 替换为你的R文件路径
 import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
@@ -60,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
                     setLoggedInStatus(true)//登入狀態開啟
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
+                    finish() // 關閉 LoginActivity
                 } else {
                     // 顯示一條訊息說明此手機號碼未被註冊
                     Toast.makeText(this, "此手機號碼未註冊!", Toast.LENGTH_SHORT).show()
@@ -88,5 +88,19 @@ class LoginActivity : AppCompatActivity() {
     private fun isLoggedIn(): Boolean {
         val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
         return sharedPreferences.getBoolean("is_logged_in", false)
+    }
+
+    override fun onBackPressed() {
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("退出APP")
+            .setMessage("確定要退出應用程式？")
+            .setPositiveButton("確定") { _, _ ->
+                finishAffinity() // 關閉所有Activity並退出應用程式
+            }
+            .setNegativeButton("取消") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+        alertDialog.show()
     }
 }

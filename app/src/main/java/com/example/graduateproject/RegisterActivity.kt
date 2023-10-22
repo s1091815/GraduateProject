@@ -142,8 +142,44 @@ class RegisterActivity: AppCompatActivity() {
 
     private fun savePhoneNumberToDatabase(phoneNumber: String) {
         val phoneDoc = firestore.collection("users").document(phoneNumber)
-        phoneDoc.set(HashMap<String, Any>()).addOnFailureListener { e ->
-            Toast.makeText(this, "儲存錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
+
+        // 初始化使用者資料 (您可以根據需要加入更多初始資料)
+        val userData = HashMap<String, Any>()
+
+        // 將使用者資料存入 Firestore 的 "users" 集合
+        phoneDoc.set(userData)
+            .addOnSuccessListener {
+                // 當使用者資料儲存成功後，新增預設地點和排行榜資料
+                addDefaultLocationsForUser(phoneNumber)
+                addToLeaderboard(phoneNumber)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "儲存錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun addDefaultLocationsForUser(phoneNumber: String) {
+        val locations = listOf(
+            mapOf("名稱" to "港區藝術中心", "位置" to hashMapOf("lat" to 24.2694974, "lng" to 120.5576727)),
+            mapOf("名稱" to "清水第二市場", "位置" to hashMapOf("lat" to 24.2680596, "lng" to 120.5607999)),
+            mapOf("名稱" to "清水國中", "位置" to hashMapOf("lat" to 24.2679703, "lng" to 120.5630871)),
+            mapOf("名稱" to "清水南社社區活動中心", "位置" to hashMapOf("lat" to 24.2648996, "lng" to 120.5639011)),
+            mapOf("名稱" to "清水南社壽德宮", "位置" to hashMapOf("lat" to 24.2658536, "lng" to 120.5633261)),
+        )
+
+        for (location in locations) {
+            val name = location["名稱"] as String
+            firestore.collection("users").document(phoneNumber).collection("地點").document(name).set(location)
         }
+    }
+
+    private fun addToLeaderboard(phoneNumber: String) {
+        val leaderboardData = mapOf(
+            "姓名" to "",  // 您可以在此加入使用者的名稱或其他資料
+            "分數" to 0,
+            "階級" to 0
+        )
+
+        firestore.collection("排行榜").document(phoneNumber).set(leaderboardData)
     }
 }

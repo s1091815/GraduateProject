@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -22,6 +23,10 @@ import com.google.firebase.ktx.Firebase
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     val db = Firebase.firestore
+
+    private var startMarker: Marker? = null
+    private var endMarker: Marker? = null
+
     private lateinit var mapView: MapView
     private lateinit var mMap: GoogleMap
     private lateinit var lastLocation: Location
@@ -35,6 +40,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private var startTime: Long = 0
     private val activityPath = mutableListOf<LatLng>()
     private var activityPolyline: Polyline? = null
+
+    private val locationLiveData: MutableLiveData<LatLng> by lazy {
+        MutableLiveData<LatLng>()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,6 +102,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     private fun btnStartActivity() {
+
+        val intent = Intent(this, LocationTrackingService::class.java)
+        startService(intent)
+
         if (isRecording) {
             return
         }
@@ -111,6 +124,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             activityPath.clear()
             activityPolyline?.remove()
 
+            startMarker = placeMarkerOnMap(LatLng(lastLocation.latitude, lastLocation.longitude), true)
+
             val locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(5000)
@@ -126,6 +141,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
 
     private fun btnEndActivity() {
+
+        stopService(Intent(this, LocationTrackingService::class.java))
+
         if (!isRecording) {
             return
         }
@@ -133,6 +151,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         isRecording = false
         fusedLocationClient.removeLocationUpdates(locationCallback)
+
+        endMarker = placeMarkerOnMap(LatLng(lastLocation.latitude, lastLocation.longitude), true)
 
         val endTime = System.currentTimeMillis()
         val durationInSeconds = (endTime - startTime) / 1000
@@ -147,9 +167,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         val infoDialog = AlertDialog.Builder(this)
             .setTitle("本次運動紀錄")
             .setMessage("運動時長： $formattedTime \n運動距離： ${"%.3f".format(distanceInMeters / 1000)} 公里")
-            .setPositiveButton("OK") { _, _ ->
+            .setPositiveButton("OK") {_ ,_ ->
                 activityPath.clear()
                 activityPolyline?.remove()
+                startMarker?.remove()
+                endMarker?.remove()
             }
             .create()
 
@@ -188,8 +210,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             if (location != null) {
                 lastLocation = location
                 val currentLatLong = LatLng(location.latitude, location.longitude)
-                placeMarkerOnMap(currentLatLong)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 12f))
+                locationLiveData.value = currentLatLong
+
+                if (isRecording) {
+                    activityPath.add(currentLatLong)
+
+                    activityPolyline?.remove()
+
+                    if (activityPath.size >= 2) {
+                        val polylineOptions = PolylineOptions()
+                            .color(ContextCompat.getColor(this@MainActivity, R.color.red))
+                            .width(10f)
+                            .addAll(activityPath)
+                        activityPolyline = mMap.addPolyline(polylineOptions)
+                    }
+                }
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 18f))
             }
         }
     }
@@ -217,6 +253,24 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled = true
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_REQUEST_CODE
+            )
+        }else {
+            getMyCurrentLocation()
+        }
+        mMap.isMyLocationEnabled = true
         mMap.setOnMarkerClickListener(this)
     }
 
@@ -241,24 +295,32 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         }
     }
 
-    private fun placeMarkerOnMap(currentLatLong: LatLng) {
+    private fun placeMarkerOnMap(currentLatLong: LatLng, shouldPlace: Boolean = true): Marker? {
         val markerOptions = MarkerOptions().position(currentLatLong)
         markerOptions.title("$currentLatLong")
-        mMap.addMarker(markerOptions)
 
-        if (isRecording) {
-            activityPath.add(currentLatLong)
-            if (activityPath.size >= 2) {
-                val polylineOptions = PolylineOptions()
-                    .color(ContextCompat.getColor(this, R.color.red))
-                    .width(10f)
-                    .addAll(activityPath)
-                activityPolyline = mMap.addPolyline(polylineOptions)
-            }
+        if (shouldPlace) {
+            val marker = mMap.addMarker(markerOptions)
+            return marker
         }
+        return null
     }
 
     override fun onMarkerClick(marker: Marker) = false
+
+    override fun onBackPressed() {
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("退出APP")
+            .setMessage("確定要退出應用程式？")
+            .setPositiveButton("確定") { _, _ ->
+                finishAffinity() // 關閉所有Activity並退出應用程式
+            }
+            .setNegativeButton("取消") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+        alertDialog.show()
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -270,6 +332,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getMyCurrentLocation()
+
+                    if (isRecording) {
+                        startMarker = placeMarkerOnMap(LatLng(lastLocation.latitude, lastLocation.longitude))
+                    }
                 } else {
                     AlertDialog.Builder(this)
                         .setTitle("需要定位權限")
