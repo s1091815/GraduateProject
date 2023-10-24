@@ -295,7 +295,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 lastLocation = location
                 val currentLatLong = LatLng(location.latitude, location.longitude)
                 locationLiveData.value = currentLatLong
-
                 if (isRecording) {
                     activityPath.add(currentLatLong)
 

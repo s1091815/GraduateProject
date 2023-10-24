@@ -3,7 +3,7 @@ package com.example.graduateproject
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -11,6 +11,7 @@ class UserActivity : BaseActivity() {
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var firebaseAuth: FirebaseAuth
+    private var selectedPhotoResId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,16 +29,13 @@ class UserActivity : BaseActivity() {
             return
         }
 
-        // 從 currentUser 中取得手機號碼
         val phoneNumber = currentUser.phoneNumber
         if(phoneNumber.isNullOrEmpty()) {
             Toast.makeText(this, "找不到手機號碼", Toast.LENGTH_LONG).show()
             finish()
             return
         }
-        // 移除 +886 前綴
         val sanitizedPhoneNumber = "0" + phoneNumber.replace("+886", "")
-        // 使用 phoneNumber 替代 userId
         val userId = sanitizedPhoneNumber
 
         val actionBar = supportActionBar
@@ -52,6 +50,7 @@ class UserActivity : BaseActivity() {
         val editH = findViewById<EditText>(R.id.editHeight)
         val btnsave = findViewById<Button>(R.id.btn_save)
         val btnlogout = findViewById<Button>(R.id.btnlogout)
+        val btn_photo = findViewById<ImageButton>(R.id.btn_photo)
 
         imageView?.setImageResource(R.drawable.logo)
 
@@ -62,6 +61,34 @@ class UserActivity : BaseActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
         }
+
+        btn_photo.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            val inflater = layoutInflater
+            val view = inflater.inflate(R.layout.dialog_photos, null)
+
+            val gridView = view.findViewById<GridView>(R.id.gridViewPhotos)
+            val photos = listOf(R.drawable.photo1, R.drawable.photo2, R.drawable.photo3, R.drawable.photo4, R.drawable.photo5)
+            gridView.adapter = ImageAdapter(this, photos)
+
+            builder.setTitle("請挑選一張作為大頭貼照片")
+            val dialog = builder.setView(view).create()
+
+            gridView.setOnItemClickListener { _, _, position, _ ->
+                selectedPhotoResId = photos[position]
+                val imageViewProfile = findViewById<ImageView>(R.id.imageViewProfile)
+                imageViewProfile.setImageResource(selectedPhotoResId!!)
+                dialog.dismiss()
+            }
+
+            val btnCancel = view.findViewById<Button>(R.id.btnCancel)
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.show()
+        }
+
 
         btnsave.setOnClickListener {
             val name = editname.text.toString().trim()
@@ -78,7 +105,8 @@ class UserActivity : BaseActivity() {
                 "姓名" to name,
                 "年齡" to age,
                 "體重" to weight,
-                "身高" to height
+                "身高" to height,
+                "照片ID" to selectedPhotoResId
             )
 
             firestore.collection("users").document(userId).set(userData)
@@ -86,7 +114,6 @@ class UserActivity : BaseActivity() {
                     Toast.makeText(this, "資料已保存", Toast.LENGTH_SHORT).show()
                     loadDataFromDatabase(userId, editname, editage, editW, editH)
 
-                    // 同步更新排行榜的姓名
                     val leaderboardUpdate: HashMap<String, Any> = hashMapOf("姓名" to name)
                     firestore.collection("排行榜").document(userId).update(leaderboardUpdate)
                         .addOnSuccessListener {
@@ -118,13 +145,17 @@ class UserActivity : BaseActivity() {
                 } else {
                     Toast.makeText(this, "找不到資料", Toast.LENGTH_SHORT).show()
                 }
+                val photoResId = document.getLong("照片ID")?.toInt()
+                if (photoResId != null) {
+                    val imageViewProfile = findViewById<ImageView>(R.id.imageViewProfile)
+                    imageViewProfile.setImageResource(photoResId)
+                }
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "載入失敗: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    //保存登入狀態
     private fun setLoggedInStatus(isLoggedIn: Boolean) {
         val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -132,7 +163,7 @@ class UserActivity : BaseActivity() {
         editor.apply()
     }
     private fun logOut() {
-        firebaseAuth.signOut() // 這裡加入Firebase的登出功能
+        firebaseAuth.signOut()
         setLoggedInStatus(false)
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)

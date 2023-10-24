@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    >
 
 
     <ImageView
@@ -16,7 +17,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <EditText
         android:id="@+id/editName"
@@ -70,7 +72,7 @@
         android:layout_marginTop="32dp"
         android:ems="10"
         android:hint="請輸入體重"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/txvWeight"
         app:layout_constraintTop_toBottomOf="@+id/editHeight" />
@@ -126,7 +128,7 @@
         android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="請輸入身高"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/txvHeight"
         app:layout_constraintTop_toBottomOf="@+id/editAge" />
@@ -171,7 +173,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
-        android:id="@+id/img_camera"
+        android:id="@+id/btn_photo"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="96dp"
