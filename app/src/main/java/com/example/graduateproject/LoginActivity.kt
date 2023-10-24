@@ -11,13 +11,16 @@ import com.google.firebase.FirebaseException
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.TimeUnit
+import android.provider.Settings.Secure
+import com.google.firebase.firestore.SetOptions
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var verificationId: String
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
+    private lateinit var authStateListener: FirebaseAuth.AuthStateListener
 
     private val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
         override fun onVerificationCompleted(credential: PhoneAuthCredential) {
@@ -49,6 +52,8 @@ class LoginActivity : AppCompatActivity() {
         var isCodeSent = false
 
         val currentUser = firebaseAuth.currentUser
+
+        /*val currentUser = firebaseAuth.currentUser
         if (currentUser != null) {
             val localFormatNumber = convertToLocalFormat(currentUser.phoneNumber ?: "")
             checkIfPhoneIsRegistered(localFormatNumber) { isRegistered ->
@@ -56,7 +61,32 @@ class LoginActivity : AppCompatActivity() {
                     goToMainActivity()
                 }
             }
+        }*/
+
+        if (intent.getBooleanExtra("OTHER_DEVICE_LOGIN", false)) {
+            Toast.makeText(this, "您已在其他裝置上登入", Toast.LENGTH_SHORT).show()
         }
+
+        authStateListener = FirebaseAuth.AuthStateListener {
+            val currentUser = it.currentUser
+            currentUser?.phoneNumber?.let { phoneNumber ->
+                // 轉換電話號碼格式
+                val localFormatNumber = convertToLocalFormat(phoneNumber)
+
+                firestore.collection("users").document(localFormatNumber)
+                    .collection("userInfo").document("deviceInfo")
+                    .get()
+                    .addOnSuccessListener { document ->
+                        val lastLoggedInDevice = document.getString("last_logged_in_device")
+                        val currentDeviceId = Secure.getString(contentResolver, Secure.ANDROID_ID)
+                        if (lastLoggedInDevice != currentDeviceId) {
+                            Toast.makeText(this, "您已在其他裝置上登入", Toast.LENGTH_SHORT).show()
+                            firebaseAuth.signOut()
+                        }
+                    }
+            }
+        }
+
 
         btnQ.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
@@ -97,6 +127,17 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
+    override fun onStart() {
+        super.onStart()
+        firebaseAuth.addAuthStateListener(authStateListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        firebaseAuth.removeAuthStateListener(authStateListener)
+    }
+
+
     private fun checkIfPhoneIsRegistered(phoneNumber: String, callback: (Boolean) -> Unit) {
         firestore.collection("users").document(phoneNumber)
             .get()
@@ -118,17 +159,39 @@ class LoginActivity : AppCompatActivity() {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
+    private fun updateDeviceIdInFirestore(phoneNumber: String) {
+        val deviceId = Secure.getString(contentResolver, Secure.ANDROID_ID)
+        val deviceInfo = mapOf("last_logged_in_device" to deviceId)
+        firestore.collection("users").document(phoneNumber)
+            .collection("userInfo").document("deviceInfo")
+            .set(deviceInfo, SetOptions.merge())
+    }
+
     private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    goToMainActivity()
+                    val userPhoneNumber = firebaseAuth.currentUser?.phoneNumber
+                    if (userPhoneNumber != null) {
+                        val localFormatNumber = convertToLocalFormat(userPhoneNumber)
+                        updateDeviceIdInFirestore(localFormatNumber)
+                        goToMainActivity()
+                    } else {
+                        Toast.makeText(this, "無法取得用戶電話號碼", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     Toast.makeText(this, "認證失敗", Toast.LENGTH_SHORT).show()
                 }
             }
     }
 
+    /*private fun convertToLocalFormat(phoneNumber: String): String {
+        return if (phoneNumber.startsWith("+886")) {
+            "0" + phoneNumber.drop(4)
+        } else {
+            phoneNumber
+        }
+    }*/
     private fun convertToLocalFormat(phoneNumber: String): String {
         return if (phoneNumber.startsWith("+886")) {
             "0" + phoneNumber.drop(4)

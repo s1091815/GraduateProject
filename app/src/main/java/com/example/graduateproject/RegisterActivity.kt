@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import java.util.concurrent.TimeUnit
 
 class RegisterActivity : AppCompatActivity() {
@@ -158,11 +159,11 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun addDefaultLocationsForUser(phoneNumber: String) {
         val locations = listOf(
-            mapOf("名稱" to "港區藝術中心", "位置" to hashMapOf("lat" to 24.2694974, "lng" to 120.5576727)),
-            mapOf("名稱" to "清水第二市場", "位置" to hashMapOf("lat" to 24.2680596, "lng" to 120.5607999)),
-            mapOf("名稱" to "清水國中", "位置" to hashMapOf("lat" to 24.2679703, "lng" to 120.5630871)),
-            mapOf("名稱" to "清水南社社區活動中心", "位置" to hashMapOf("lat" to 24.2648996, "lng" to 120.5639011)),
-            mapOf("名稱" to "清水南社壽德宮", "位置" to hashMapOf("lat" to 24.2658536, "lng" to 120.5633261))
+            mapOf("名稱" to "港區藝術中心", "位置" to GeoPoint( 24.2694974,  120.5576727)),
+            mapOf("名稱" to "清水第二市場", "位置" to GeoPoint(24.2680596, 120.5607999)),
+            mapOf("名稱" to "清水國中", "位置" to GeoPoint( 24.2679703, 120.5630871)),
+            mapOf("名稱" to "清水南社社區活動中心", "位置" to GeoPoint(24.2648996,120.5639011)),
+            mapOf("名稱" to "清水南社壽德宮", "位置" to GeoPoint(24.2658536, 120.5633261))
         )
 
         for (location in locations) {

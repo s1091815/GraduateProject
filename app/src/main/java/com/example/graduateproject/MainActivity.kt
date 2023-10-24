@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -17,12 +18,18 @@ import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     val db = Firebase.firestore
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var firebaseAuth: FirebaseAuth
 
     private var startMarker: Marker? = null
     private var endMarker: Marker? = null
@@ -56,6 +63,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         supportActionBar?.title = ""
 
+        firestore = FirebaseFirestore.getInstance()
+        firebaseAuth = FirebaseAuth.getInstance()
+
         val actionBar = supportActionBar
 
         actionBar?.displayOptions = androidx.appcompat.app.ActionBar.DISPLAY_SHOW_CUSTOM
@@ -70,6 +80,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         val btn_chart = findViewById<ImageButton>(R.id.btn_chart)
         val btn_start = findViewById<ImageButton>(R.id.btn_start)
         val btn_end = findViewById<ImageButton>(R.id.btn_end)
+        val btn_add = findViewById<ImageButton>(R.id.btn_add)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -96,9 +107,82 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         btn_end.setOnClickListener {
             btnEndActivity()
         }
+        btn_add.setOnClickListener {
+            showInputDialog()
+        }
 
         // Get the current location
         getMyCurrentLocation()
+    }
+
+    private fun showInputDialog() {
+        // 創建 EditText 用於輸入
+        val input = EditText(this)
+        input.hint = "輸入地點名稱"
+
+        // 創建 AlertDialog
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("新增地點")
+        builder.setView(input)
+        builder.setPositiveButton("確定") { _, _ ->
+            val name = input.text.toString().trim()
+            if (name.isNotEmpty()) {
+                // 若有輸入，則加入到資料庫
+                addLocationToDatabase(name)
+            } else {
+                Toast.makeText(this@MainActivity, "請輸入地點名稱", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("取消", null)
+
+        builder.show()
+    }
+    private fun addLocationToDatabase(name: String) {
+        if (name.isNotEmpty()) {
+            // 取得當前使用者 ID
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser == null) {
+                Toast.makeText(this, "未登入的用戶", Toast.LENGTH_LONG).show()
+                finish()
+                return
+            }
+
+            // 從 currentUser 中取得手機號碼
+            val phoneNumber = currentUser.phoneNumber
+            if(phoneNumber.isNullOrEmpty()) {
+                Toast.makeText(this, "找不到手機號碼", Toast.LENGTH_LONG).show()
+                finish()
+                return
+            }
+            // 移除 +886 前綴
+            val sanitizedPhoneNumber = "0" + phoneNumber.replace("+886", "")
+            // 使用 phoneNumber 替代 userId
+            val userId = sanitizedPhoneNumber
+
+
+            if (lastLocation != null) {
+                // 建立地點的資料
+                val locationData = hashMapOf(
+                    "名稱" to name,
+                    "位置" to GeoPoint(lastLocation.latitude, lastLocation.longitude)
+                )
+
+                // 將地點加入到 Firestore
+                val name = locationData["名稱"] as String
+                db.collection("users").document(userId).collection("地點").document(name)
+                    .set(locationData, SetOptions.merge())
+                    .addOnSuccessListener {
+                        Toast.makeText(this@MainActivity, "地點已加入!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this@MainActivity, "加入失敗: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            } else {
+                Toast.makeText(this@MainActivity, "當前位置未知", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "請輸入地點名稱", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun btnStartActivity() {
@@ -268,9 +352,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 LOCATION_REQUEST_CODE
             )
         }else {
-            return
+            getMyCurrentLocation()
         }
-        getMyCurrentLocation()
         mMap.isMyLocationEnabled = true
         mMap.setOnMarkerClickListener(this)
     }
