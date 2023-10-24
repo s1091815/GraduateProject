@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 
 
-class ChartActivity: AppCompatActivity() {
+class ChartActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

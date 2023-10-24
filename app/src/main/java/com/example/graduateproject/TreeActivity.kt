@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 
 
-class TreeActivity: AppCompatActivity() {
+class TreeActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

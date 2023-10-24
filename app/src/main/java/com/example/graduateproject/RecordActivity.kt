@@ -2,16 +2,30 @@ package com.example.graduateproject
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ImageButton
-import android.widget.ImageView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
-
-class RecordActivity: AppCompatActivity() {
+class RecordActivity: BaseActivity() {
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var listView: ListView
+    private lateinit var listAdapter: LocationListAdapter
+    private var locationList = mutableListOf<String>()
+    private var sanitizedPhoneNumber: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.record)
+
+        firestore = FirebaseFirestore.getInstance()
+
+        listView = findViewById(R.id.list_view)
+
+        fetchLocationsFromDatabase()
+
+        listAdapter = LocationListAdapter(this, locationList, firestore, sanitizedPhoneNumber)
+        listView.adapter = listAdapter
 
         supportActionBar?.title = ""
 
@@ -31,6 +45,38 @@ class RecordActivity: AppCompatActivity() {
             startActivity(intent)
         }
     }
+
+    private fun fetchLocationsFromDatabase() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "未登入的用戶", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        val phoneNumber = currentUser.phoneNumber
+        if(phoneNumber.isNullOrEmpty()) {
+            Toast.makeText(this, "找不到手機號碼", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        sanitizedPhoneNumber = "0" + phoneNumber.replace("+886", "")
+
+        firestore.collection("users").document(sanitizedPhoneNumber).collection("地點")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    locationList.add(document.id)
+                }
+                listAdapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(this, "錯誤: ${exception.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+
     override fun onBackPressed() {
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
