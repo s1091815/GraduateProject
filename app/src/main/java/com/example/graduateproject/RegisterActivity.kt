@@ -180,7 +180,7 @@ class RegisterActivity : AppCompatActivity() {
         val leaderboardData = mapOf(
             "姓名" to "",  // 您可以在此加入使用者的名稱或其他資料
             "分數" to 0,
-            "階級" to 0
+            "階級" to 1
         )
 
         firestore.collection("排行榜").document(phoneNumber).set(leaderboardData)

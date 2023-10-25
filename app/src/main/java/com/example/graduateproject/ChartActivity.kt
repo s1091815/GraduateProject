@@ -75,6 +75,9 @@ class ChartActivity: BaseActivity() {
                     )
                     exerciseRecordList.add(record)
                 }
+
+                exerciseRecordList.reverse()  // 反轉列表
+
                 recordAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { exception ->

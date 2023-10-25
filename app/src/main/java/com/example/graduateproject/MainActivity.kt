@@ -249,6 +249,19 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
         val formattedTime = String.format("%d小時%d分%d秒", hours, minutes, seconds)
         val formattedDistance = "%.3f".format(distanceInMeters / 1000)
 
+        // 1. 計算分數
+        val scoreToAdd = calculateScore(minutes.toInt(), formattedDistance.toDouble())
+
+        // 2. 將分數累加到Firebase的數據庫
+        val currentUser = firebaseAuth.currentUser
+        if(currentUser != null) {
+            val phoneNumber = currentUser.phoneNumber
+            if(!phoneNumber.isNullOrEmpty()) {
+                val sanitizedPhoneNumber = "0" + phoneNumber.replace("+886", "")
+                addScoreToLeaderboard(sanitizedPhoneNumber, minutes.toInt(), formattedDistance.toDouble())
+            }
+        }
+
         val infoDialog = AlertDialog.Builder(this)
             .setTitle("本次運動紀錄")
             .setMessage("運動時長： $formattedTime \n運動距離： $formattedDistance 公里")
@@ -261,6 +274,49 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
             .create()
         addExerciseRecordToDatabase(minutes, formattedDistance, startTime, endTime)
         infoDialog.show()
+    }
+    fun calculateScore(minutes: Int, kilometers: Double): Int {
+        return (minutes * 1) + (kilometers * 10).toInt()
+    }
+    fun addScoreToLeaderboard(phoneNumber: String, minutes: Int, kilometers: Double) {
+        // 2. 獲取當前使用者在Firebase中的分數
+        firestore.collection("排行榜").document(phoneNumber).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val currentScore = document.getLong("分數")?.toInt() ?: 0
+                    val newScore = currentScore + calculateScore(minutes, kilometers)
+                    val newRank = determineRank(newScore)
+
+                    // 3. 新的分數 = 現有的分數 + 剛計算出來的分數
+                    val updatedData: MutableMap<String, Any> = hashMapOf(
+                        "分數" to newScore as Any,
+                        "階級" to newRank as Any
+                    )
+
+                    // 4. 將新的分數更新到Firebase中
+                    firestore.collection("排行榜").document(phoneNumber).update(updatedData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "分數已更新", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "更新分數錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "找不到使用者資料", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "讀取分數錯誤: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+    fun determineRank(score: Int): Int {
+        return when {
+            score < 500 -> 1
+            score < 1500 -> 2
+            score < 3000 -> 3
+            score < 5000 -> 4
+            else -> 5
+        }
     }
     private fun convertMillisToTimeFormat(millis: Long): String { //轉換開始跟結束時間
         val date = Date(millis)
