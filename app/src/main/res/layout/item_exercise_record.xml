@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/txv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="日期："
+        android:layout_marginEnd="10dp" />
+
+    <TextView
+        android:id="@+id/txv_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="運動距離："
+        android:layout_marginEnd="10dp" />
+
+    <TextView
+        android:id="@+id/txv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="運動時長：" />
+
+</LinearLayout>

@@ -2,7 +2,6 @@ package com.example.graduateproject
 
 import android.Manifest
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -24,6 +23,8 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -223,7 +224,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
         }
     }
 
-
     private fun btnEndActivity() {
 
         stopService(Intent(this, LocationTrackingService::class.java))
@@ -247,10 +247,11 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
         val seconds = durationInSeconds % 60
 
         val formattedTime = String.format("%d小時%d分%d秒", hours, minutes, seconds)
+        val formattedDistance = "%.3f".format(distanceInMeters / 1000)
 
         val infoDialog = AlertDialog.Builder(this)
             .setTitle("本次運動紀錄")
-            .setMessage("運動時長： $formattedTime \n運動距離： ${"%.3f".format(distanceInMeters / 1000)} 公里")
+            .setMessage("運動時長： $formattedTime \n運動距離： $formattedDistance 公里")
             .setPositiveButton("OK") {_ ,_ ->
                 activityPath.clear()
                 activityPolyline?.remove()
@@ -258,8 +259,55 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 endMarker?.remove()
             }
             .create()
-
+        addExerciseRecordToDatabase(minutes, formattedDistance, startTime, endTime)
         infoDialog.show()
+    }
+    private fun convertMillisToTimeFormat(millis: Long): String { //轉換開始跟結束時間
+        val date = Date(millis)
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return sdf.format(date)
+    }
+
+    private fun addExerciseRecordToDatabase(minutes: Long, formattedDistance: String, startTime: Long, endTime: Long) {
+        val currentUser = firebaseAuth.currentUser
+        val formattedStartTime = convertMillisToTimeFormat(startTime)
+        val formattedEndTime = convertMillisToTimeFormat(endTime)
+        if (currentUser == null) {
+            Toast.makeText(this, "未登入的用戶", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        val phoneNumber = currentUser.phoneNumber
+        if(phoneNumber.isNullOrEmpty()) {
+            Toast.makeText(this, "找不到手機號碼", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        val sanitizedPhoneNumber = "0" + phoneNumber.replace("+886", "")
+        val userId = sanitizedPhoneNumber
+
+        val calendar = Calendar.getInstance()
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+
+        val exerciseRecord = hashMapOf(
+            "開始時間" to formattedStartTime,
+            "結束時間" to formattedEndTime,
+            "運動時長(分鐘)" to minutes,
+            "運動距離(公里)" to formattedDistance,
+            "日期" to currentDate
+        )
+        val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(calendar.time)
+        val dateTime = "$currentDate $currentTime"
+        db.collection("users").document(userId).collection("運動紀錄").document(dateTime)
+            .set(exerciseRecord)
+            .addOnSuccessListener {
+                Toast.makeText(this@MainActivity, "運動紀錄已加入!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this@MainActivity, "加入失敗: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun calculateDistance(path: List<LatLng>): Double {
