@@ -248,7 +248,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
 
         val formattedTime = String.format("%d小時%d分%d秒", hours, minutes, seconds)
         val formattedDistance = "%.3f".format(distanceInMeters / 1000)
-
+        val minutesdata = hours*60+minutes
         // 1. 計算分數
         val scoreToAdd = calculateScore(minutes.toInt(), formattedDistance.toDouble())
 
@@ -258,7 +258,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
             val phoneNumber = currentUser.phoneNumber
             if(!phoneNumber.isNullOrEmpty()) {
                 val sanitizedPhoneNumber = "0" + phoneNumber.replace("+886", "")
-                addScoreToLeaderboard(sanitizedPhoneNumber, minutes.toInt(), formattedDistance.toDouble())
+                addScoreToLeaderboard(sanitizedPhoneNumber, minutesdata.toInt(), formattedDistance.toDouble())
             }
         }
 
@@ -272,19 +272,19 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 endMarker?.remove()
             }
             .create()
-        addExerciseRecordToDatabase(minutes, formattedDistance, startTime, endTime)
+        addExerciseRecordToDatabase(minutesdata, formattedDistance, startTime, endTime)
         infoDialog.show()
     }
-    fun calculateScore(minutes: Int, kilometers: Double): Int {
-        return (minutes * 1) + (kilometers * 10).toInt()
+    fun calculateScore(minutesdata: Int, kilometers: Double): Int {
+        return (minutesdata * 1) + (kilometers * 10).toInt()
     }
-    fun addScoreToLeaderboard(phoneNumber: String, minutes: Int, kilometers: Double) {
+    fun addScoreToLeaderboard(phoneNumber: String, minutesdata: Int, kilometers: Double) {
         // 2. 獲取當前使用者在Firebase中的分數
         firestore.collection("排行榜").document(phoneNumber).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val currentScore = document.getLong("分數")?.toInt() ?: 0
-                    val newScore = currentScore + calculateScore(minutes, kilometers)
+                    val newScore = currentScore + calculateScore(minutesdata, kilometers)
                     val newRank = determineRank(newScore)
 
                     // 3. 新的分數 = 現有的分數 + 剛計算出來的分數
@@ -324,7 +324,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
         return sdf.format(date)
     }
 
-    private fun addExerciseRecordToDatabase(minutes: Long, formattedDistance: String, startTime: Long, endTime: Long) {
+    private fun addExerciseRecordToDatabase(minutesdata: Long, formattedDistance: String, startTime: Long, endTime: Long) {
         val currentUser = firebaseAuth.currentUser
         val formattedStartTime = convertMillisToTimeFormat(startTime)
         val formattedEndTime = convertMillisToTimeFormat(endTime)
@@ -350,7 +350,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
         val exerciseRecord = hashMapOf(
             "開始時間" to formattedStartTime,
             "結束時間" to formattedEndTime,
-            "運動時長(分鐘)" to minutes,
+            "運動時長(分鐘)" to minutesdata,
             "運動距離(公里)" to formattedDistance,
             "日期" to currentDate
         )

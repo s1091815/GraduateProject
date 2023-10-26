@@ -59,6 +59,17 @@
         android:text="目前分數: 0" />
 
 
+    <TextView
+        android:id="@+id/level"
+        android:layout_width="82dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rankProgressBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="158dp"
+        android:layout_marginTop="45dp"
+        android:text="當前階級: "
+        android:textSize="16sp" />
+
     <ImageView
         android:id="@+id/rankImageView"
         android:layout_width="300dp"

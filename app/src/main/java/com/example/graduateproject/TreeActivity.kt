@@ -29,6 +29,7 @@ class TreeActivity: BaseActivity() {
     lateinit var currentScoreTextView: TextView
     lateinit var maxScoreTextView: TextView
     lateinit var currentTotalScoreTextView: TextView
+    lateinit var level: TextView
 
     fun updateRankProgressBar(score: Int) {
         val (currentMin, currentMax, currentProgress) = when {
@@ -65,6 +66,7 @@ class TreeActivity: BaseActivity() {
         currentScoreTextView = findViewById(R.id.currentScoreTextView)
         maxScoreTextView = findViewById(R.id.maxScoreTextView)
         currentTotalScoreTextView = findViewById(R.id.currentTotalScoreTextView)
+        level = findViewById(R.id.level)
         val btnHint: ImageButton = findViewById(R.id.btn_hint)
         btnHint.setOnClickListener {
             showRankingRulesDialog()
@@ -127,6 +129,8 @@ class TreeActivity: BaseActivity() {
                     if (document.exists()) {
                         // 從文檔中獲取階級字段的值
                         val rank = document.getLong("階級")?.toInt()
+                        // 更新level TextView的內容
+                        level.text = "階級: $rank"
                         callback(rank) // 使用回調函數返回階級值
                         val score = document.getLong("分數")?.toInt() ?: 0
                         updateRankProgressBar(score)
