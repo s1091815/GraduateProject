@@ -34,6 +34,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
 
     private var startMarker: Marker? = null
     private var endMarker: Marker? = null
+    private var endMarker2: Marker? = null
 
     private lateinit var mapView: MapView
     private lateinit var mMap: GoogleMap
@@ -270,6 +271,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 activityPolyline?.remove()
                 startMarker?.remove()
                 endMarker?.remove()
+                endMarker2?.remove()
             }
             .create()
         addExerciseRecordToDatabase(minutesdata, formattedDistance, startTime, endTime)
@@ -448,17 +450,18 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            return
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 LOCATION_REQUEST_CODE
             )
+            return
         }else {
             getMyCurrentLocation()
         }
         mMap.isMyLocationEnabled = true
         mMap.setOnMarkerClickListener(this)
+        checkAndPlaceMarker()
     }
 
     private fun getMyCurrentLocation() {
@@ -512,6 +515,15 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
             }
             .create()
         alertDialog.show()
+    }
+
+    private fun checkAndPlaceMarker() {
+        val latitude = intent.getDoubleExtra("LOCATION_LATITUDE", Double.MIN_VALUE)
+        val longitude = intent.getDoubleExtra("LOCATION_LONGITUDE", Double.MIN_VALUE)
+
+        if (latitude != Double.MIN_VALUE && longitude != Double.MIN_VALUE) {
+            endMarker2 = placeMarkerOnMap(LatLng(latitude, longitude))
+        }
     }
 
     override fun onRequestPermissionsResult(
