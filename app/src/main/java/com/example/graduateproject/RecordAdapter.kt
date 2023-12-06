@@ -33,9 +33,9 @@ class RecordAdapter(
         }
 
         val record = getItem(position) as Record
-        holder.txv_date.text = "日期：${record.date}"
-        holder.txv_distance.text = "運動距離：${record.distance}"
-        holder.txv_time.text = "運動時長：${record.time}"
+        holder.txv_date.text = "${record.date}"
+        holder.txv_distance.text = "運動距離：${record.distance}公里"
+        holder.txv_time.text = "運動時長：${record.time}分鐘"
 
         return view
     }

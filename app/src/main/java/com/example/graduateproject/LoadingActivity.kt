@@ -78,7 +78,6 @@ class LoadingActivity : AppCompatActivity() {
                         callback(true)
                     } else {
                         firebaseAuth.signOut()
-                        Toast.makeText(this, "您已在其他裝置上登入", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@LoadingActivity, LoginActivity::class.java)
                         startActivity(intent)
                         finish()

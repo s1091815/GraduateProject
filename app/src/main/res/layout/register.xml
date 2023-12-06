@@ -83,12 +83,12 @@
 
     <Button
         android:id="@+id/btn_sendverify"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
+        android:layout_width="101dp"
+        android:layout_height="58dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="28dp"
         android:text="發送驗證碼"
-        android:textSize="10sp"
+        android:textSize="12sp"
         app:layout_constraintStart_toEndOf="@+id/edit_Phone"
         app:layout_constraintTop_toBottomOf="@+id/img_logo" />
 

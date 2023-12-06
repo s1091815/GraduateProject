@@ -42,8 +42,8 @@ class LocationListAdapter(
 
                 if (geoPoint != null) {
                     val builder = AlertDialog.Builder(context)
-                    builder.setTitle("導航確認")
-                    builder.setMessage("您確定要前往此地點嗎?")
+                    builder.setTitle("地點確認")
+                    builder.setMessage("您確定要選擇此地點嗎?")
 
                     builder.setPositiveButton("確定") { _, _ ->
                         //跳轉到MainActivity運作導航，並且傳遞所選地點的經緯度作為額外資訊
