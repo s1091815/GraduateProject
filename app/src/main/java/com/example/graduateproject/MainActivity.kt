@@ -224,7 +224,15 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
             )
         }
     }
-
+    private fun calculateCaloriesBurned(distanceInKm: Double, durationInHours: Double): Double {
+        return when {
+            durationInHours == 0.0 -> 0.0
+            distanceInKm / durationInHours in 0.0..4.0 -> distanceInKm / 3.5
+            distanceInKm / durationInHours in 4.0..8.0 -> distanceInKm / 5.5
+            distanceInKm / durationInHours in 8.0..20.0 -> distanceInKm / 12.0
+            else -> -1.0 // 表示速率超過20公里/小時，不計算熱量消耗
+        }
+    }
     private fun btnEndActivity() {
 
         stopService(Intent(this, LocationTrackingService::class.java))
@@ -274,6 +282,21 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 endMarker2?.remove()
             }
             .create()
+
+        val distanceInKm = distanceInMeters / 1000.0
+        val durationInHours = durationInSeconds / 3600.0
+        val caloriesBurned = calculateCaloriesBurned(distanceInKm, durationInHours)
+
+        if (caloriesBurned >= 0) {
+            // 顯示熱量消耗信息
+            val formattedCalories = String.format("%.2f", caloriesBurned)
+            val message = "運動時長： $formattedTime \n運動距離： $formattedDistance 公里\n消耗熱量： $formattedCalories 卡路里"
+            infoDialog.setMessage(message)
+        } else {
+            // 通知用戶此次運動紀錄不予採計儲存
+            Toast.makeText(this, "運動速率過高，此次運動紀錄不予採計儲存", Toast.LENGTH_LONG).show()
+            return
+        }
         addExerciseRecordToDatabase(minutesdata, formattedDistance, startTime, endTime)
         infoDialog.show()
     }

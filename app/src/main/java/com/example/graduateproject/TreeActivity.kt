@@ -61,6 +61,7 @@ class TreeActivity: BaseActivity() {
         actionBar?.setCustomView(R.layout.custom_actionbar_withhome)
 
         val bnt_backhome = actionBar?.customView?.findViewById<ImageButton>(R.id.bnt_backhome)
+        val bnt_sos = actionBar?.customView?.findViewById<ImageButton>(R.id.bnt_sos)
         val imageView = actionBar?.customView?.findViewById<ImageView>(R.id.customImageView)
         val btnRank: Button = findViewById(R.id.btn_rank)
         currentScoreTextView = findViewById(R.id.currentScoreTextView)

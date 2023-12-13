@@ -93,8 +93,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/rankImageView"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="143dp"
-        android:layout_marginTop="82dp"
+        android:layout_marginStart="142dp"
+        android:layout_marginTop="100dp"
         android:text="排行榜"
         android:textSize="18sp" />
 

@@ -1,11 +1,19 @@
 package com.example.graduateproject
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
+import android.telephony.SmsManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import android.Manifest
 
 class UserActivity : BaseActivity() {
 
@@ -65,7 +73,24 @@ class UserActivity : BaseActivity() {
         }
 
         bnt_sos?.setOnClickListener {
-
+            checkAndRequestPermissions()
+            firestore.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val emergencyPhone = document.getString("緊急連絡電話")
+                        emergencyPhone?.let { phone ->
+                            getCurrentLocation { location ->
+                                location?.let {
+                                    sendEmergencyMessage(phone, it)
+                                    makeEmergencyCall(phone)
+                                }
+                            }
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "獲取緊急連絡人失敗: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
 
         btn_photo.setOnClickListener {
@@ -140,6 +165,80 @@ class UserActivity : BaseActivity() {
         btnlogout.setOnClickListener {
             logOut()
         }
+    }
+
+    private fun getCurrentLocation(callback: (Location?) -> Unit) {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        callback(location ?: return)
+    }
+
+    private fun sendEmergencyMessage(phoneNumber: String, location: Location?) {
+        val smsManager = SmsManager.getDefault()
+        val message = if (location != null) {
+            val formattedLatitude = String.format("%.6f", location.latitude)
+            val formattedLongitude = String.format("%.6f", location.longitude)
+            "緊急情况！我的位置是：緯度 $formattedLatitude, 經度 ${location.longitude}"
+        } else {
+            "緊急情况！我的位置是：未知"
+        }
+        smsManager.sendTextMessage(phoneNumber, null, message, null, null)
+    }
+
+    private fun makeEmergencyCall(phoneNumber: String) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            // 顯示解釋為什麼需要權限的對話框，並提供一個按鈕讓用戶授予權限
+            requestCallPermission()
+            return
+        }
+        // 權限已被授予，進行撥號
+        val intent = Intent(Intent.ACTION_CALL)
+        intent.data = Uri.parse("tel:$phoneNumber")
+        startActivity(intent)
+    }
+
+    // 添加一個新的方法來請求撥打電話的權限
+    private fun requestCallPermission() {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PERMISSION)
+    }
+
+    private fun checkAndRequestPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.SEND_SMS), REQUEST_SEND_SMS_PERMISSION)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_SEND_SMS_PERMISSION -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Toast.makeText(this, "SMS發送權限已授予", Toast.LENGTH_SHORT).show()
+                    // 檢查是否還需要請求撥打電話權限
+                    checkAndRequestPhoneCallPermission()
+                } else {
+                    Toast.makeText(this, "需要發送短信權限來進行緊急求助", Toast.LENGTH_SHORT).show()
+                }
+            }
+            REQUEST_CALL_PERMISSION -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Toast.makeText(this, "撥打電話權限已授予", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "需要撥打電話權限來進行緊急求助", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun checkAndRequestPhoneCallPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PERMISSION)
+        }
+    }
+
+    companion object {
+        private const val REQUEST_CALL_PERMISSION = 1
+        private val REQUEST_SEND_SMS_PERMISSION = 2
     }
 
     private fun loadDataFromDatabase(userId: String, nameET: EditText, ageET: EditText, weightET: EditText, heightET: EditText, phoneET: EditText) {
