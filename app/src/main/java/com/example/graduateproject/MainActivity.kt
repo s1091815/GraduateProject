@@ -71,7 +71,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClick
         val actionBar = supportActionBar
 
         actionBar?.displayOptions = androidx.appcompat.app.ActionBar.DISPLAY_SHOW_CUSTOM
-        actionBar?.setCustomView(R.layout.custom_actionbar)
+        actionBar?.setCustomView(R.layout.custom_actionbar_withhome)
 
         val imageView = actionBar?.customView?.findViewById<ImageView>(R.id.customImageView)
         imageView?.setImageResource(R.drawable.logo)

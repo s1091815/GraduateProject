@@ -43,6 +43,7 @@ class UserActivity : BaseActivity() {
         actionBar?.setCustomView(R.layout.custom_actionbar_withhome)
 
         val bnt_backhome = actionBar?.customView?.findViewById<ImageButton>(R.id.bnt_backhome)
+        val bnt_sos = actionBar?.customView?.findViewById<ImageButton>(R.id.bnt_sos)
         val imageView = actionBar?.customView?.findViewById<ImageView>(R.id.customImageView)
         val editname = findViewById<EditText>(R.id.editName)
         val editage = findViewById<EditText>(R.id.editAge)
@@ -51,15 +52,20 @@ class UserActivity : BaseActivity() {
         val btnsave = findViewById<Button>(R.id.btn_save)
         val btnlogout = findViewById<Button>(R.id.btnlogout)
         val btn_photo = findViewById<ImageButton>(R.id.btn_photo)
+        val editphone = findViewById<EditText>(R.id.editPhone)
 
         imageView?.setImageResource(R.drawable.logo)
 
-        loadDataFromDatabase(userId, editname, editage, editW, editH)
+        loadDataFromDatabase(userId, editname, editage, editW, editH, editphone)
 
         bnt_backhome?.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+        }
+
+        bnt_sos?.setOnClickListener {
+
         }
 
         btn_photo.setOnClickListener {
@@ -95,6 +101,7 @@ class UserActivity : BaseActivity() {
             val age = editage.text.toString().toIntOrNull()
             val weight = editW.text.toString().toDoubleOrNull()
             val height = editH.text.toString().toDoubleOrNull()
+            val phone = editphone.text.toString().trim()
 
             if(name.isEmpty() || age == null || weight == null || height == null) {
                 Toast.makeText(this, "請確保所有欄位都有填寫正確", Toast.LENGTH_SHORT).show()
@@ -106,13 +113,14 @@ class UserActivity : BaseActivity() {
                 "年齡" to age,
                 "體重" to weight,
                 "身高" to height,
-                "照片ID" to selectedPhotoResId
+                "照片ID" to selectedPhotoResId,
+                "緊急連絡電話" to phone
             )
 
             firestore.collection("users").document(userId).set(userData)
                 .addOnSuccessListener {
                     Toast.makeText(this, "資料已保存", Toast.LENGTH_SHORT).show()
-                    loadDataFromDatabase(userId, editname, editage, editW, editH)
+                    loadDataFromDatabase(userId, editname, editage, editW, editH, editphone)
 
                     val leaderboardUpdate: HashMap<String, Any> = hashMapOf("姓名" to name)
                     firestore.collection("排行榜").document(userId).update(leaderboardUpdate)
@@ -134,7 +142,7 @@ class UserActivity : BaseActivity() {
         }
     }
 
-    private fun loadDataFromDatabase(userId: String, nameET: EditText, ageET: EditText, weightET: EditText, heightET: EditText) {
+    private fun loadDataFromDatabase(userId: String, nameET: EditText, ageET: EditText, weightET: EditText, heightET: EditText, phoneET: EditText) {
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document != null) {
@@ -142,6 +150,7 @@ class UserActivity : BaseActivity() {
                     ageET.setText(document.getLong("年齡")?.toString())
                     weightET.setText(document.getDouble("體重")?.toString())
                     heightET.setText(document.getDouble("身高")?.toString())
+                    phoneET.setText(document.getString("緊急連絡電話"))
                 } else {
                     Toast.makeText(this, "找不到資料", Toast.LENGTH_SHORT).show()
                 }

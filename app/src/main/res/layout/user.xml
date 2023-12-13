@@ -12,20 +12,19 @@
         android:id="@+id/imageViewProfile"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="40dp"
         android:src="@drawable/people"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/editName"
-        android:layout_width="wrap_content"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="28dp"
         android:ems="10"
         android:hint="請輸入姓名"
         android:inputType="textPersonName"
@@ -34,98 +33,47 @@
         app:layout_constraintTop_toBottomOf="@+id/imageViewProfile" />
 
     <TextView
+        android:id="@+id/txvWeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="體重："
+        android:textColor="#3F51B5"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txvHeight" />
+
+    <TextView
         android:id="@+id/txvCM"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="32dp"
         android:text="公分"
         app:layout_constraintStart_toEndOf="@+id/editHeight"
         app:layout_constraintTop_toBottomOf="@+id/editAge" />
 
-    <TextView
-        android:id="@+id/txvKG"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:text="公斤"
-        app:layout_constraintStart_toEndOf="@+id/editWeight"
-        app:layout_constraintTop_toBottomOf="@+id/txvCM" />
-
     <EditText
-        android:id="@+id/editAge"
-        android:layout_width="wrap_content"
+        android:id="@+id/editPhone"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
-        android:hint="請輸入年齡"
-        android:inputType="number"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/txvAge"
-        app:layout_constraintTop_toBottomOf="@+id/editName" />
-
-    <EditText
-        android:id="@+id/editWeight"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="32dp"
-        android:ems="10"
-        android:hint="請輸入體重"
+        android:hint="請輸手機號碼"
         android:inputType="numberDecimal"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/txvWeight"
-        app:layout_constraintTop_toBottomOf="@+id/editHeight" />
-
-    <TextView
-        android:id="@+id/txvHeight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
-        android:text="身高："
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.137"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txvAge" />
-
-    <TextView
-        android:id="@+id/txvAge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
-        android:text="年齡："
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.137"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txvName"
-        tools:ignore="MissingConstraints" />
-
-    <TextView
-        android:id="@+id/txvName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:text="姓名："
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.131"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewProfile" />
+        app:layout_constraintStart_toEndOf="@+id/txvPhone"
+        app:layout_constraintTop_toBottomOf="@+id/editWeight" />
 
     <EditText
         android:id="@+id/editHeight"
-        android:layout_width="200dp"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="請輸入身高"
         android:inputType="numberDecimal"
@@ -134,18 +82,96 @@
         app:layout_constraintTop_toBottomOf="@+id/editAge" />
 
     <TextView
-        android:id="@+id/txvWeight"
+        android:id="@+id/txvAge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
-        android:text="體重："
+        android:layout_marginTop="36dp"
+        android:text="年齡："
         android:textColor="#3F51B5"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.142"
+        app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txvHeight" />
+        app:layout_constraintTop_toBottomOf="@+id/txvName"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/editWeight"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="請輸入體重"
+        android:inputType="numberDecimal"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/txvWeight"
+        app:layout_constraintTop_toBottomOf="@+id/editHeight" />
+
+    <TextView
+        android:id="@+id/txvPhone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="緊急聯絡電話："
+        android:textColor="#3F51B5"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.07"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txvWeight" />
+
+    <TextView
+        android:id="@+id/txvHeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="身高："
+        android:textColor="#3F51B5"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txvAge" />
+
+    <TextView
+        android:id="@+id/txvKG"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="公斤"
+        app:layout_constraintStart_toEndOf="@+id/editWeight"
+        app:layout_constraintTop_toBottomOf="@+id/editHeight" />
+
+    <EditText
+        android:id="@+id/editAge"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="請輸入年齡"
+        android:inputType="number"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/txvAge"
+        app:layout_constraintTop_toBottomOf="@+id/editName" />
+
+    <TextView
+        android:id="@+id/txvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="姓名："
+        android:textColor="#3F51B5"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewProfile" />
 
 
     <Button
@@ -176,8 +202,8 @@
         android:id="@+id/btn_photo"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginEnd="96dp"
-        android:layout_marginBottom="496dp"
+        android:layout_marginEnd="108dp"
+        android:layout_marginBottom="528dp"
         android:contentDescription="photo"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
